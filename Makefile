@@ -1,5 +1,14 @@
-all: ma 
+CC = g++
+CFLAGS = -g -Wall
+SRCS = Motion_detect.cpp
+PROG = MD
+WITH_JPG = OFF
 
-ma:	
-	gcc -o Motion_detect Motion_detect.cpp `pkg-config --cflags --libs opencv` -L/usr/local/lib64 -lm
+OPENCV = `pkg-config opencv --cflags --libs`
+LIBS = $(OPENCV)
 
+$(PROG):$(SRCS)
+	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
+
+run:
+	./MD
