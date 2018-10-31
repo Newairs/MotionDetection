@@ -36,7 +36,7 @@ int main( int argc, char** argv )
 	
 	cap.set (CV_CAP_PROP_FRAME_WIDTH, cam_width);
     cap.set (CV_CAP_PROP_FRAME_HEIGHT, cam_lenght);
-    writeDutyCycle(duty_cycle);
+    //writeDutyCycle(duty_cycle, &lastFrame);
 	
     if(!cap.isOpened())  // check if we succeeded
     	return -1;
@@ -103,14 +103,14 @@ int main( int argc, char** argv )
 			if(count >0)
 			{
 				int mean = (leftmost.x + rightmost.x)/(2*count);
-				if(mean>cam_width/2 + cam_width/6)
+				if(mean<cam_width/2 + cam_width/6)
 				{
 					cout << "esquerda\n";
 					if(duty_cycle > 18000000)
 						duty_cycle -= STEP;
 					writeDutyCycle(duty_cycle, &lastFrame);
 				}
-				else if(mean<cam_width/2 - cam_width/6)
+				else if(mean>cam_width/2 - cam_width/6)
 				{
 					cout << "direita\n";
 					if(duty_cycle < 19000000)
