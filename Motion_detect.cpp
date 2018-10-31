@@ -15,7 +15,7 @@ using namespace std;
 #define cam_lenght 180
 #define STEP 100000
 
-void writeDutyCycle(long duty_cycle);
+void writeDutyCycle(long duty_cycle, Mat* lastFrame);
 void writePhoto(Mat frame, int i);
 
 int main( int argc, char** argv )
@@ -108,14 +108,14 @@ int main( int argc, char** argv )
 					cout << "esquerda\n";
 					if(duty_cycle > 18000000)
 						duty_cycle -= STEP;
-					writeDutyCycle(duty_cycle);
+					writeDutyCycle(duty_cycle, &lastFrame);
 				}
 				else if(mean<cam_width/2 - cam_width/6)
 				{
 					cout << "direita\n";
 					if(duty_cycle < 19000000)
 						duty_cycle += STEP;
-					writeDutyCycle(duty_cycle);
+					writeDutyCycle(duty_cycle, &lastFrame);
 				}
 				else
 				{
@@ -145,12 +145,14 @@ int main( int argc, char** argv )
 	return 0;
 }
 
-void writeDutyCycle(long duty_cycle){
+void writeDutyCycle(long duty_cycle, Mat* lastFrame){
 	
     FILE *fDuty; 
     fDuty = fopen("/sys/class/pwm/pwmchip1/pwm-1:0/duty_cycle","w");
     
     fprintf(fDuty,"%ld", duty_cycle);
+    
+    lastFrame = NULL;
     
     fclose(fDuty);
     usleep(250000);
@@ -159,6 +161,6 @@ void writeDutyCycle(long duty_cycle){
 void writePhoto(Mat frame, int i){
 	char tmp[20];
 	
-	sprintf(tmp,"frame%d.jpg",i);
+	sprintf(tmp,"fotos/foto%d.jpg",i);
 	imwrite(tmp,frame);	
 }
