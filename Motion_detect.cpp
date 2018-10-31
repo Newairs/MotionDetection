@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <algorithm>
+#include <unistd.h>
 
 using namespace cv;
 using namespace std;
@@ -12,12 +13,17 @@ using namespace std;
 #define dilation_size 10  //Declaration for the dilation window size, used in the morphologic operations
 #define cam_width 320
 #define cam_lenght 180
+#define STEP 100000
+
+void writeDutyCycle(long duty_cycle);
+void writePhoto(Mat frame, int i);
 
 int main( int argc, char** argv )
 {
-   
 	/* Loop invariant variables declaration block */
 	//begin
+	long duty_cycle = 18500000;
+	int photo_num = 1;
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;	
 	Mat gray, blur, firstFrame, frameDiff, dist, lastFrame, final;
@@ -26,10 +32,11 @@ int main( int argc, char** argv )
 	//end
     	
 	/* Camera inicialization */
-	VideoCapture cap(-1); // open the default camera
+	VideoCapture cap(0); // open the default camera
 	
 	cap.set (CV_CAP_PROP_FRAME_WIDTH, cam_width);
     cap.set (CV_CAP_PROP_FRAME_HEIGHT, cam_lenght);
+    writeDutyCycle(duty_cycle);
 	
     if(!cap.isOpened())  // check if we succeeded
     	return -1;
@@ -97,11 +104,25 @@ int main( int argc, char** argv )
 			{
 				int mean = (leftmost.x + rightmost.x)/(2*count);
 				if(mean>cam_width/2 + cam_width/6)
+				{
 					cout << "esquerda\n";
+					if(duty_cycle > 18000000)
+						duty_cycle -= STEP;
+					writeDutyCycle(duty_cycle);
+				}
 				else if(mean<cam_width/2 - cam_width/6)
+				{
 					cout << "direita\n";
+					if(duty_cycle < 19000000)
+						duty_cycle += STEP;
+					writeDutyCycle(duty_cycle);
+				}
 				else
+				{
 					cout << "centro\n";
+					writePhoto(lastFrame, photo_num);
+					photo_num++;
+				}
 			}
 			// end
 	
@@ -122,4 +143,22 @@ int main( int argc, char** argv )
 	imwrite("first.jpg",firstFrame); // Saves the first frame.
 	// the camera will be deinitialized automatically in VideoCapture destructor
 	return 0;
+}
+
+void writeDutyCycle(long duty_cycle){
+	
+    FILE *fDuty; 
+    fDuty = fopen("/sys/class/pwm/pwmchip1/pwm-1:0/duty_cycle","w");
+    
+    fprintf(fDuty,"%ld", duty_cycle);
+    
+    fclose(fDuty);
+    usleep(250000);
+}
+
+void writePhoto(Mat frame, int i){
+	char tmp[20];
+	
+	sprintf(tmp,"frame%d.jpg",i);
+	imwrite(tmp,frame);	
 }
