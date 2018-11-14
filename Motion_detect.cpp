@@ -68,7 +68,7 @@ int main( int argc, char** argv )
 		{
 			
 			absdiff(blur, lastFrame, frameDiff); // Finds different pixels among the two frames.
-			threshold( frameDiff, dist, 50, 255,THRESH_BINARY); // The threshold indicates how sensible is the camera to 											environmental movement. It should be noted that a minimun 											threshold is requires, as even two consecutive frames of a 											motionless capture are different to a certain degree.
+			threshold( frameDiff, dist, 75, 255,THRESH_BINARY); // The threshold indicates how sensible is the camera to 											environmental movement. It should be noted that a minimun 											threshold is requires, as even two consecutive frames of a 											motionless capture are different to a certain degree.
 			
 			Mat element = getStructuringElement( MORPH_RECT,
         			                               Size( 2*dilation_size + 1, 2*dilation_size+1 ),
@@ -120,7 +120,8 @@ int main( int argc, char** argv )
 				else
 				{
 					cout << "centro\n";
-					writePhoto(lastFrame, photo_num);
+					bitwise_or(lastFrame,final,final);
+					writePhoto(final, photo_num);
 					photo_num++;
 				}
 			}
@@ -155,7 +156,7 @@ void writeDutyCycle(long duty_cycle, Mat* lastFrame){
     lastFrame = NULL;
     
     fclose(fDuty);
-    usleep(500000);
+    usleep(750000);
 }
 
 void writePhoto(Mat frame, int i){
