@@ -10,7 +10,7 @@
 using namespace cv;
 using namespace std;
 
-#define dilation_size 10  //Declaration for the dilation window size, used in the morphologic operations
+#define dilation_size 8  //Declaration for the dilation window size, used in the morphologic operations
 #define cam_width 320
 #define cam_lenght 180
 #define STEP 100000
@@ -68,7 +68,7 @@ int main( int argc, char** argv )
 		{
 			
 			absdiff(blur, lastFrame, frameDiff); // Finds different pixels among the two frames.
-			threshold( frameDiff, dist, 30, 255,THRESH_BINARY); // The threshold indicates how sensible is the camera to 											environmental movement. It should be noted that a minimun 											threshold is requires, as even two consecutive frames of a 											motionless capture are different to a certain degree.
+			threshold( frameDiff, dist, 50, 255,THRESH_BINARY); // The threshold indicates how sensible is the camera to 											environmental movement. It should be noted that a minimun 											threshold is requires, as even two consecutive frames of a 											motionless capture are different to a certain degree.
 			
 			Mat element = getStructuringElement( MORPH_RECT,
         			                               Size( 2*dilation_size + 1, 2*dilation_size+1 ),
@@ -103,14 +103,14 @@ int main( int argc, char** argv )
 			if(count >0)
 			{
 				int mean = (leftmost.x + rightmost.x)/(2*count);
-				if(mean<cam_width/2 + cam_width/6)
+				if(mean<cam_width/2 - cam_width/6)
 				{
 					cout << "esquerda\n";
 					if(duty_cycle > 18000000)
 						duty_cycle -= STEP;
 					writeDutyCycle(duty_cycle, &lastFrame);
 				}
-				else if(mean>cam_width/2 - cam_width/6)
+				else if(mean>cam_width/2 + cam_width/6)
 				{
 					cout << "direita\n";
 					if(duty_cycle < 19000000)
@@ -155,12 +155,12 @@ void writeDutyCycle(long duty_cycle, Mat* lastFrame){
     lastFrame = NULL;
     
     fclose(fDuty);
-    usleep(250000);
+    usleep(500000);
 }
 
 void writePhoto(Mat frame, int i){
 	char tmp[20];
 	
-	sprintf(tmp,"fotos/foto%d.jpg",i);
+	sprintf(tmp,"foto%d.jpg",i);
 	imwrite(tmp,frame);	
 }
